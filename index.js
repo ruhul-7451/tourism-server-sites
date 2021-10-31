@@ -27,7 +27,7 @@ async function run() {
         app.post('/destination', async (req, res) => {
             const doc = req.body
             const result = await tourCollection.insertOne(doc);
-            console.log(`A document was inserted with the _id: ${result.insertedId}`);
+            res.send(result);
         });
 
         // get a document
@@ -43,7 +43,6 @@ async function run() {
 
         //get single item from a document by id
         app.get('/destination/:tripId', async (req, res) => {
-            console.log('single destination hit');
             const id = req.params.tripId
             const query = { _id: ObjectId(id) };
             const result = await tourCollection.findOne(query);
@@ -55,10 +54,9 @@ async function run() {
 
         // insert booking document
         app.post('/booking', async (req, res) => {
-            console.log("booking hit");
             const doc = req.body
             const result = await orderCollection.insertOne(doc);
-            console.log(`Your booking inserted with the _id: ${result.insertedId}`);
+            res.send(result);
         });
         //get booking document
         app.get('/booking', async (req, res) => {
@@ -69,6 +67,34 @@ async function run() {
             }
             const result = await cursor.toArray();
             res.send(result);
+        });
+
+        //get a specific booking
+        app.get('/booking/:bookId', async (req, res) => {
+            const id = req.params.bookId
+            const query = { _id: ObjectId(id) };
+            const result = await orderCollection.findOne(query);
+            res.json(result);
+        });
+
+        //update booking status
+        app.put('/booking/:bookId', async (req, res) => {
+            const filter = req.body;
+            const updateDoc = {
+                $set: {
+                    bookingStatus: `Confirmed`
+                },
+            };
+            const result = await orderCollection.updateOne(filter, updateDoc);
+            res.json(result);
+        });
+
+        //delete myBooking
+        app.delete('/booking/:bookId', async (req, res) => {
+            const id = req.params.bookId;
+            const query = { _id: ObjectId(id) };
+            const result = await orderCollection.deleteOne(query);
+            res.json(result);
         });
 
     }

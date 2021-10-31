@@ -21,6 +21,7 @@ async function run() {
         await client.connect();
         const database = client.db("bookMyTrip");
         const tourCollection = database.collection("tours");
+        const orderCollection = database.collection("orders");
 
         // insert a document
         app.post('/destination', async (req, res) => {
@@ -47,7 +48,28 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const result = await tourCollection.findOne(query);
             res.json(result);
-        })
+        });
+
+
+        //manage order section//
+
+        // insert booking document
+        app.post('/booking', async (req, res) => {
+            console.log("booking hit");
+            const doc = req.body
+            const result = await orderCollection.insertOne(doc);
+            console.log(`Your booking inserted with the _id: ${result.insertedId}`);
+        });
+        //get booking document
+        app.get('/booking', async (req, res) => {
+            const query = {};
+            const cursor = orderCollection.find(query);
+            if ((await cursor.count()) === 0) {
+                console.log("No documents found!");
+            }
+            const result = await cursor.toArray();
+            res.send(result);
+        });
 
     }
     finally {
@@ -59,7 +81,7 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('Hello World!')
+    res.send('I am Database from mongodb')
 })
 
 app.listen(port, () => {
